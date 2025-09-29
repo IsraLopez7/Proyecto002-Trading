@@ -1,4 +1,4 @@
-# main.py
+
 """
 Script Principal de Ejecución
 Orquesta todo el flujo del proyecto de trading sistemático
@@ -12,14 +12,6 @@ warnings.filterwarnings('ignore')
 from datetime import datetime
 import json
 import os
-
-# Importar módulos del proyecto
-from data_loader import DataLoader
-from indicators import TechnicalIndicators
-from strategy import TradingStrategy, StrategyValidator
-from backtest_engine import BacktestEngine
-from optimizer import StrategyOptimizer, parameter_sensitivity_analysis
-from visualization import PerformanceVisualizer
 
 # Configuración global
 CONFIG = {
@@ -69,6 +61,14 @@ def run_complete_analysis():
     print("="*80)
     print(f"Inicio: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print()
+    
+    # Importar módulos
+    from data_loader import DataLoader
+    from indicators import TechnicalIndicators
+    from strategy import TradingStrategy, StrategyValidator
+    from backtest_engine import BacktestEngine
+    from optimizer import StrategyOptimizer, parameter_sensitivity_analysis
+    from visualization import PerformanceVisualizer
     
     # ========================
     # 1. CARGA DE DATOS
@@ -282,4 +282,309 @@ def run_complete_analysis():
                 'total_return': train_results['performance_metrics']['total_return'],
                 'calmar_ratio': train_results['performance_metrics']['calmar_ratio'],
                 'sharpe_ratio': train_results['performance_metrics']['sharpe_ratio'],
-                'max_drawdown': train_results['performance
+                'max_drawdown': train_results['performance_metrics']['max_drawdown'],
+                'win_rate': train_results['performance_metrics']['win_rate'],
+                'total_trades': train_results['performance_metrics']['total_trades']
+            },
+            'test': {
+                'total_return': test_results['performance_metrics']['total_return'],
+                'calmar_ratio': test_results['performance_metrics']['calmar_ratio'],
+                'sharpe_ratio': test_results['performance_metrics']['sharpe_ratio'],
+                'max_drawdown': test_results['performance_metrics']['max_drawdown'],
+                'win_rate': test_results['performance_metrics']['win_rate'],
+                'total_trades': test_results['performance_metrics']['total_trades']
+            },
+            'validation': {
+                'total_return': val_results['performance_metrics']['total_return'],
+                'calmar_ratio': val_results['performance_metrics']['calmar_ratio'],
+                'sharpe_ratio': val_results['performance_metrics']['sharpe_ratio'],
+                'max_drawdown': val_results['performance_metrics']['max_drawdown'],
+                'win_rate': val_results['performance_metrics']['win_rate'],
+                'total_trades': val_results['performance_metrics']['total_trades']
+            }
+        },
+        'walk_forward': {
+            'avg_test_calmar': wf_results['avg_test_calmar'],
+            'stability_ratio': wf_results['stability_ratio'],
+            'n_windows': wf_results['n_windows']
+        },
+        'timestamp': datetime.now().isoformat()
+    }
+    
+    # Guardar en JSON
+    with open('reports/results_summary.json', 'w') as f:
+        json.dump(results_summary, f, indent=4)
+    
+    print("✅ Resultados guardados en reports/results_summary.json")
+    
+    # Guardar trades en CSV
+    if train_results['trades']:
+        train_trades_df = pd.DataFrame(train_results['trades'])
+        train_trades_df.to_csv('reports/train_trades.csv', index=False)
+        print("✅ Trades de entrenamiento guardados en reports/train_trades.csv")
+    
+    if test_results['trades']:
+        test_trades_df = pd.DataFrame(test_results['trades'])
+        test_trades_df.to_csv('reports/test_trades.csv', index=False)
+        print("✅ Trades de prueba guardados en reports/test_trades.csv")
+    
+    # ========================
+    # 8. CONCLUSIONES
+    # ========================
+    print("\n" + "="*50)
+    print("CONCLUSIONES Y RECOMENDACIONES")
+    print("="*50)
+    
+    # Evaluar performance
+    avg_calmar = (train_results['performance_metrics']['calmar_ratio'] + 
+                  test_results['performance_metrics']['calmar_ratio'] + 
+                  val_results['performance_metrics']['calmar_ratio']) / 3
+    
+    avg_sharpe = (train_results['performance_metrics']['sharpe_ratio'] + 
+                  test_results['performance_metrics']['sharpe_ratio'] + 
+                  val_results['performance_metrics']['sharpe_ratio']) / 3
+    
+    print("\n📈 EVALUACIÓN DE LA ESTRATEGIA:")
+    
+    if avg_calmar > 1.0:
+        print("  ✅ Calmar Ratio promedio > 1.0: Estrategia prometedora")
+    elif avg_calmar > 0.5:
+        print("  ⚠️ Calmar Ratio promedio entre 0.5-1.0: Estrategia aceptable pero mejorable")
+    else:
+        print("  ❌ Calmar Ratio promedio < 0.5: Estrategia necesita mejoras significativas")
+    
+    if avg_sharpe > 1.0:
+        print("  ✅ Sharpe Ratio promedio > 1.0: Buen ratio riesgo-retorno")
+    elif avg_sharpe > 0.5:
+        print("  ⚠️ Sharpe Ratio promedio entre 0.5-1.0: Ratio riesgo-retorno moderado")
+    else:
+        print("  ❌ Sharpe Ratio promedio < 0.5: Ratio riesgo-retorno insuficiente")
+    
+    # Verificar sobreajuste
+    train_calmar = train_results['performance_metrics']['calmar_ratio']
+    test_calmar = test_results['performance_metrics']['calmar_ratio']
+    val_calmar = val_results['performance_metrics']['calmar_ratio']
+    
+    calmar_degradation = ((train_calmar - test_calmar) / train_calmar) * 100 if train_calmar > 0 else 0
+    
+    print("\n🔍 ANÁLISIS DE SOBREAJUSTE:")
+    if calmar_degradation < 20:
+        print(f"  ✅ Degradación Train->Test: {calmar_degradation:.1f}% (Bajo sobreajuste)")
+    elif calmar_degradation < 40:
+        print(f"  ⚠️ Degradación Train->Test: {calmar_degradation:.1f}% (Sobreajuste moderado)")
+    else:
+        print(f"  ❌ Degradación Train->Test: {calmar_degradation:.1f}% (Alto sobreajuste)")
+    
+    print("\n💡 RECOMENDACIONES:")
+    
+    # Recomendaciones basadas en métricas
+    if train_results['performance_metrics']['total_trades'] < 100:
+        print("  • Considerar reducir los umbrales de señal para generar más trades")
+    
+    if train_results['performance_metrics']['win_rate'] < 40:
+        print("  • Mejorar los filtros de entrada para aumentar el win rate")
+    
+    if train_results['performance_metrics']['max_drawdown'] > 30:
+        print("  • Ajustar la gestión de riesgo para reducir el drawdown máximo")
+    
+    if wf_results['stability_ratio'] < 1.0:
+        print("  • La estrategia muestra inestabilidad en diferentes períodos")
+        print("  • Considerar usar parámetros más robustos o adaptativos")
+    
+    if avg_calmar < 1.0:
+        print("  • Explorar indicadores adicionales o diferentes combinaciones")
+        print("  • Considerar técnicas de machine learning para mejorar señales")
+    
+    print("\n" + "="*80)
+    print(f"Análisis completado: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print("="*80)
+    
+    return {
+        'train_results': train_results,
+        'test_results': test_results,
+        'val_results': val_results,
+        'optimized_config': optimized_config,
+        'optimization_report': opt_report,
+        'walk_forward_results': wf_results
+    }
+
+
+def quick_test():
+    """
+    Función de prueba rápida con datos reducidos
+    """
+    from data_loader import DataLoader
+    from backtest_engine import BacktestEngine
+    from visualization import PerformanceVisualizer
+    
+    print("\n🚀 MODO DE PRUEBA RÁPIDA")
+    print("="*50)
+    
+    # Configuración reducida para pruebas
+    test_config = CONFIG.copy()
+    test_config['optimization']['n_trials'] = 10
+    
+    # Cargar datos
+    data_loader = DataLoader(test_config)
+    df = data_loader.load_data(test_config['data']['file_path'])
+    
+    # Usar solo primeros 5000 registros
+    df_subset = df[:5000]
+    
+    # Backtest rápido
+    engine = BacktestEngine(test_config)
+    results = engine.run_backtest(df_subset, verbose=True)
+    
+    # Visualización rápida
+    visualizer = PerformanceVisualizer(results, test_config)
+    dashboard = visualizer.create_performance_dashboard()
+    
+    plt.show()
+    
+    return results
+
+
+def analyze_single_parameter(param_name, param_range):
+    """
+    Analiza el impacto de un solo parámetro
+    
+    Parameters:
+    -----------
+    param_name : str
+        Nombre del parámetro a analizar
+    param_range : list
+        Rango de valores a probar
+    """
+    from data_loader import DataLoader
+    from optimizer import StrategyOptimizer, parameter_sensitivity_analysis
+    
+    print(f"\n📊 Analizando parámetro: {param_name}")
+    print("="*50)
+    
+    # Cargar datos
+    data_loader = DataLoader(CONFIG)
+    df = data_loader.load_data(CONFIG['data']['file_path'])
+    train_data, _, _ = data_loader.split_data()
+    
+    # Usar subset para análisis rápido
+    train_subset = train_data[:10000]
+    
+    # Crear optimizador
+    optimizer = StrategyOptimizer(CONFIG)
+    
+    # Análisis de sensibilidad
+    sensitivity_df = parameter_sensitivity_analysis(
+        optimizer,
+        train_subset,
+        param_name,
+        param_range
+    )
+    
+    # Graficar resultados
+    fig, axes = plt.subplots(2, 2, figsize=(12, 8))
+    
+    # Calmar Ratio
+    axes[0, 0].plot(sensitivity_df['value'], sensitivity_df['calmar_ratio'], 'o-')
+    axes[0, 0].set_title(f'Calmar Ratio vs {param_name}')
+    axes[0, 0].set_xlabel(param_name)
+    axes[0, 0].set_ylabel('Calmar Ratio')
+    axes[0, 0].grid(True, alpha=0.3)
+    
+    # Sharpe Ratio
+    axes[0, 1].plot(sensitivity_df['value'], sensitivity_df['sharpe_ratio'], 'o-', color='orange')
+    axes[0, 1].set_title(f'Sharpe Ratio vs {param_name}')
+    axes[0, 1].set_xlabel(param_name)
+    axes[0, 1].set_ylabel('Sharpe Ratio')
+    axes[0, 1].grid(True, alpha=0.3)
+    
+    # Total Return
+    axes[1, 0].plot(sensitivity_df['value'], sensitivity_df['total_return'], 'o-', color='green')
+    axes[1, 0].set_title(f'Total Return vs {param_name}')
+    axes[1, 0].set_xlabel(param_name)
+    axes[1, 0].set_ylabel('Total Return (%)')
+    axes[1, 0].grid(True, alpha=0.3)
+    
+    # Max Drawdown
+    axes[1, 1].plot(sensitivity_df['value'], sensitivity_df['max_drawdown'], 'o-', color='red')
+    axes[1, 1].set_title(f'Max Drawdown vs {param_name}')
+    axes[1, 1].set_xlabel(param_name)
+    axes[1, 1].set_ylabel('Max Drawdown (%)')
+    axes[1, 1].grid(True, alpha=0.3)
+    
+    plt.suptitle(f'Sensitivity Analysis: {param_name}', fontsize=14, fontweight='bold')
+    plt.tight_layout()
+    plt.show()
+    
+    # Encontrar valor óptimo
+    optimal_idx = sensitivity_df['calmar_ratio'].idxmax()
+    optimal_value = sensitivity_df.loc[optimal_idx, 'value']
+    optimal_calmar = sensitivity_df.loc[optimal_idx, 'calmar_ratio']
+    
+    print(f"\n✅ Valor óptimo de {param_name}: {optimal_value}")
+    print(f"   Calmar Ratio: {optimal_calmar:.3f}")
+    
+    return sensitivity_df
+
+
+def main():
+    """
+    Función principal con menú interactivo
+    """
+    print("\n" + "="*80)
+    print("SISTEMA DE TRADING ALGORÍTMICO BTC/USDT")
+    print("="*80)
+    print("\nOpciones disponibles:")
+    print("1. Ejecutar análisis completo")
+    print("2. Prueba rápida")
+    print("3. Analizar parámetro específico")
+    print("4. Salir")
+    
+    choice = input("\nSeleccione opción (1-4): ")
+    
+    if choice == "1":
+        try:
+            results = run_complete_analysis()
+            print("\n✅ Análisis completo finalizado")
+            print("📁 Reportes guardados en carpeta 'reports/'")
+        except Exception as e:
+            print(f"\n❌ Error durante el análisis: {str(e)}")
+            print("Asegúrese de que todos los módulos estén disponibles")
+        
+    elif choice == "2":
+        try:
+            results = quick_test()
+            print("\n✅ Prueba rápida completada")
+        except Exception as e:
+            print(f"\n❌ Error durante la prueba: {str(e)}")
+        
+    elif choice == "3":
+        print("\nParámetros disponibles:")
+        print("- sma_short (10-30)")
+        print("- sma_long (40-80)")
+        print("- ema_short (8-20)")
+        print("- ema_long (21-40)")
+        print("- stoch_window (10-20)")
+        print("- atr_window (10-20)")
+        print("- stop_loss_atr_multiplier (1.5-3.0)")
+        print("- take_profit_atr_multiplier (2.0-5.0)")
+        
+        param = input("\nIngrese nombre del parámetro: ")
+        range_str = input("Ingrese rango (ej: 10,15,20,25,30): ")
+        
+        try:
+            param_range = [float(x) for x in range_str.split(',')]
+            sensitivity_df = analyze_single_parameter(param, param_range)
+            print("\n✅ Análisis de sensibilidad completado")
+        except Exception as e:
+            print(f"\n❌ Error durante el análisis: {str(e)}")
+        
+    else:
+        print("\n👋 Saliendo del sistema...")
+    
+    print("\n" + "="*80)
+    print("FIN DEL PROGRAMA")
+    print("="*80)
+
+
+if __name__ == "__main__":
+    main()
