@@ -1,0 +1,266 @@
+
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Trading Strategy Performance Report</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 40px; }
+                h1 { color: #2E86AB; }
+                h2 { color: #333; border-bottom: 2px solid #2E86AB; padding-bottom: 10px; }
+                table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+                th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+                th { background-color: #2E86AB; color: white; }
+                tr:nth-child(even) { background-color: #f2f2f2; }
+                .metric-box { 
+                    display: inline-block; 
+                    margin: 10px;
+                    padding: 15px;
+                    border: 2px solid #2E86AB;
+                    border-radius: 5px;
+                    min-width: 200px;
+                }
+                .positive { color: green; }
+                .negative { color: red; }
+            </style>
+        </head>
+        <body>
+            <h1>Trading Strategy Performance Report - BTC/USDT</h1>
+            
+            <h2>Executive Summary</h2>
+            <div>
+                <div class="metric-box">
+                    <strong>Total Return:</strong><br>
+                    <span class="negative">
+                        -20.33%
+                    </span>
+                </div>
+                <div class="metric-box">
+                    <strong>Calmar Ratio:</strong><br>
+                    -0.059
+                </div>
+                <div class="metric-box">
+                    <strong>Sharpe Ratio:</strong><br>
+                    0.250
+                </div>
+                <div class="metric-box">
+                    <strong>Max Drawdown:</strong><br>
+                    <span class="negative">-71.13%</span>
+                </div>
+                <div class="metric-box">
+                    <strong>Win Rate:</strong><br>
+                    39.2%
+                </div>
+                <div class="metric-box">
+                    <strong>Total Trades:</strong><br>
+                    1243
+                </div>
+            </div>
+            
+            <h2>Performance Metrics</h2>
+            <table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>total_return</th>
+      <td>-20.334</td>
+    </tr>
+    <tr>
+      <th>annual_return</th>
+      <td>-4.192</td>
+    </tr>
+    <tr>
+      <th>monthly_return</th>
+      <td>-0.349</td>
+    </tr>
+    <tr>
+      <th>sharpe_ratio</th>
+      <td>0.250</td>
+    </tr>
+    <tr>
+      <th>sortino_ratio</th>
+      <td>0.254</td>
+    </tr>
+    <tr>
+      <th>calmar_ratio</th>
+      <td>-0.059</td>
+    </tr>
+    <tr>
+      <th>max_drawdown</th>
+      <td>-71.127</td>
+    </tr>
+    <tr>
+      <th>volatility_annual</th>
+      <td>63.742</td>
+    </tr>
+    <tr>
+      <th>var_95</th>
+      <td>-0.679</td>
+    </tr>
+    <tr>
+      <th>total_trades</th>
+      <td>1243.000</td>
+    </tr>
+    <tr>
+      <th>winning_trades</th>
+      <td>487.000</td>
+    </tr>
+    <tr>
+      <th>losing_trades</th>
+      <td>756.000</td>
+    </tr>
+    <tr>
+      <th>win_rate</th>
+      <td>39.179</td>
+    </tr>
+    <tr>
+      <th>avg_win</th>
+      <td>3788.097</td>
+    </tr>
+    <tr>
+      <th>avg_loss</th>
+      <td>-2413.535</td>
+    </tr>
+    <tr>
+      <th>profit_factor</th>
+      <td>1.011</td>
+    </tr>
+    <tr>
+      <th>expectancy</th>
+      <td>16.228</td>
+    </tr>
+    <tr>
+      <th>avg_holding_hours</th>
+      <td>32.516</td>
+    </tr>
+    <tr>
+      <th>max_consecutive_wins</th>
+      <td>8.000</td>
+    </tr>
+    <tr>
+      <th>max_consecutive_losses</th>
+      <td>13.000</td>
+    </tr>
+    <tr>
+      <th>total_days</th>
+      <td>1770.667</td>
+    </tr>
+    <tr>
+      <th>total_years</th>
+      <td>4.851</td>
+    </tr>
+  </tbody>
+</table>
+            
+            <h2>Monthly Returns</h2>
+            <table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Return (%)</th>
+    </tr>
+    <tr>
+      <th>Date</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2021-07-31</th>
+      <td>10.428241</td>
+    </tr>
+    <tr>
+      <th>2021-08-31</th>
+      <td>4.070520</td>
+    </tr>
+    <tr>
+      <th>2021-09-30</th>
+      <td>-6.184535</td>
+    </tr>
+    <tr>
+      <th>2021-10-31</th>
+      <td>25.735556</td>
+    </tr>
+    <tr>
+      <th>2021-11-30</th>
+      <td>-3.510427</td>
+    </tr>
+    <tr>
+      <th>2021-12-31</th>
+      <td>-20.698971</td>
+    </tr>
+    <tr>
+      <th>2022-01-31</th>
+      <td>-17.207047</td>
+    </tr>
+    <tr>
+      <th>2022-02-28</th>
+      <td>-1.309174</td>
+    </tr>
+    <tr>
+      <th>2022-03-31</th>
+      <td>0.420770</td>
+    </tr>
+    <tr>
+      <th>2022-04-30</th>
+      <td>-19.080154</td>
+    </tr>
+    <tr>
+      <th>2022-05-31</th>
+      <td>-14.869361</td>
+    </tr>
+    <tr>
+      <th>2022-06-30</th>
+      <td>-16.699382</td>
+    </tr>
+  </tbody>
+</table>
+            
+            <h2>Annual Returns</h2>
+            <table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Return (%)</th>
+    </tr>
+    <tr>
+      <th>Date</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2017-12-31</th>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2018-12-31</th>
+      <td>-53.102644</td>
+    </tr>
+    <tr>
+      <th>2019-12-31</th>
+      <td>9.251163</td>
+    </tr>
+    <tr>
+      <th>2020-12-31</th>
+      <td>102.603570</td>
+    </tr>
+    <tr>
+      <th>2021-12-31</th>
+      <td>2.756319</td>
+    </tr>
+    <tr>
+      <th>2022-12-31</th>
+      <td>-52.914969</td>
+    </tr>
+  </tbody>
+</table>
+            
+            <p><i>Report generated on 2025-09-30 13:27:20</i></p>
+        </body>
+        </html>
+        

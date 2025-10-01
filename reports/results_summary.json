@@ -1,0 +1,87 @@
+{
+    "config": {
+        "data": {
+            "file_path": "Binance_BTCUSDT_1h.csv",
+            "train_ratio": 0.6,
+            "test_ratio": 0.2,
+            "validation_ratio": 0.2
+        },
+        "trading": {
+            "commission": 0.00125,
+            "initial_capital": 100000,
+            "position_size": 1.0,
+            "allow_short": true,
+            "leverage": 1
+        },
+        "indicators": {
+            "sma_short": 30,
+            "sma_long": 62,
+            "ema_short": 14,
+            "ema_long": 25,
+            "stoch_window": 15,
+            "stoch_smooth": 6,
+            "atr_window": 18,
+            "rsi_window": 18,
+            "stop_loss_atr_multiplier": 2.0,
+            "take_profit_atr_multiplier": 4.7,
+            "risk_per_trade": 0.01
+        },
+        "risk_management": {
+            "stop_loss_atr_multiplier": 2.6,
+            "take_profit_atr_multiplier": 4.4,
+            "max_positions": 1,
+            "risk_per_trade": 0.01
+        },
+        "optimization": {
+            "n_trials": 100,
+            "n_jobs": -1,
+            "seed": 42,
+            "cv_splits": 5
+        }
+    },
+    "optimized_params": {
+        "sma_short": 25,
+        "sma_long": 53,
+        "ema_short": 15,
+        "ema_long": 36,
+        "stoch_window": 17,
+        "stoch_smooth": 5,
+        "atr_window": 19,
+        "rsi_window": 10,
+        "stop_loss_atr": 2.5,
+        "take_profit_atr": 4.9,
+        "risk_per_trade": 0.02
+    },
+    "performance": {
+        "train": {
+            "total_return": -20.33428026742139,
+            "calmar_ratio": -0.05893211863997032,
+            "sharpe_ratio": 0.2498837500556044,
+            "max_drawdown": -71.1267235623835,
+            "win_rate": 39.17940466613033,
+            "total_trades": 1243
+        },
+        "test": {
+            "total_return": -10.56234375314512,
+            "calmar_ratio": -0.1566247445429151,
+            "sharpe_ratio": 0.12433112938845829,
+            "max_drawdown": -41.70493505379794,
+            "win_rate": 33.477321814254864,
+            "total_trades": 463
+        },
+        "validation": {
+            "total_return": -35.7740283702264,
+            "calmar_ratio": -0.38703844125454157,
+            "sharpe_ratio": -0.1904842280812031,
+            "max_drawdown": -57.15715634042397,
+            "win_rate": 34.46088794926004,
+            "total_trades": 473
+        }
+    },
+    "walk_forward": {
+        "avg_test_calmar": 9.169099353633126,
+        "stability_ratio": 0.566572315816026,
+        "n_windows": 2
+    },
+    "timestamp": "2025-09-30T13:27:20.441136"
+}
