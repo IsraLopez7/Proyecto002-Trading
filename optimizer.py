@@ -7,7 +7,7 @@ import optuna
 import numpy as np
 from data_loader import DataLoader
 from indicators import TechnicalIndicators
-from strategy_simple import TradingStrategy
+from strategy import TradingStrategy
 from metrics import PerformanceMetrics
 
 # Silenciar warnings de Optuna
