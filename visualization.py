@@ -346,6 +346,153 @@ def create_monthly_performance_table(portfolio_hist, dates):
 
     plt.tight_layout()
     return fig
+def create_quarterly_performance_table(portfolio_hist, dates):
+    """Crea tabla de retornos trimestrales"""
+    try:
+        import seaborn as sns
+        _HAS_SEABORN = True
+    except Exception:
+        _HAS_SEABORN = False
+
+    # DataFrame base
+    df = pd.DataFrame({
+        'date': pd.to_datetime(dates),
+        'value': portfolio_hist
+    }).set_index('date')
+
+    # Retornos trimestrales (%)
+    quarterly = df.resample('Q').last().pct_change() * 100
+    quarterly['Year'] = quarterly.index.year
+    quarterly['Quarter'] = quarterly.index.quarter
+
+    pivot_table = quarterly.pivot_table(
+        values='value', index='Year', columns='Quarter', aggfunc='first'
+    ).sort_index()
+
+    fig, ax = plt.subplots(figsize=(12, 8))
+
+    if _HAS_SEABORN:
+        quarter_names = ['Q1', 'Q2', 'Q3', 'Q4']
+        sns.heatmap(
+            pivot_table, annot=True, fmt='.1f', cmap='RdYlGn', center=0,
+            cbar_kws={'label': 'Retorno (%)'},
+            xticklabels=quarter_names, ax=ax, linewidths=0.5, linecolor='gray'
+        )
+        ax.set_title('Retornos Trimestrales (%)', fontsize=14, fontweight='bold')
+        ax.set_xlabel('Trimestre')
+        ax.set_ylabel('Año')
+    else:
+        ax.axis('off')
+        ax.set_title('Retornos Trimestrales (%)', fontsize=14, fontweight='bold')
+        tbl = pivot_table.round(1).fillna('')
+        table = ax.table(cellText=tbl.values, rowLabels=tbl.index, colLabels=tbl.columns,
+                         loc='center', cellLoc='center')
+        table.auto_set_font_size(False)
+        table.set_fontsize(10)
+        table.scale(1.2, 1.5)
+
+    # Columna "Anual"
+    annual = df.resample('Y').last().pct_change() * 100
+    if 'value' in annual.columns:
+        annual_series = annual['value']
+    else:
+        annual_series = annual.squeeze()
+
+    for i, year in enumerate(pivot_table.index):
+        mask = (annual_series.index.year == year)
+        if mask.any():
+            annual_ret = float(annual_series.loc[mask].iloc[0])
+            ax.text(len(pivot_table.columns) + 0.5, i + 0.5, f'{annual_ret:.1f}%',
+                    ha='center', va='center', fontweight='bold')
+
+    ax.text(len(pivot_table.columns) + 0.5, -0.7, 'Anual', ha='center', fontweight='bold')
+
+    plt.tight_layout()
+    return fig
+
+def create_annual_performance_table(portfolio_hist, dates):
+    """Crea tabla de retornos anuales con estadísticas"""
+    # DataFrame base
+    df = pd.DataFrame({
+        'date': pd.to_datetime(dates),
+        'value': portfolio_hist
+    }).set_index('date')
+
+    # Retornos anuales
+    annual = df.resample('Y').last()
+    annual_returns = annual.pct_change() * 100
+    
+    # Calcular métricas adicionales por año
+    stats = []
+    for year in annual.index.year.unique():
+        year_data = df[df.index.year == year]
+        
+        if len(year_data) > 1:
+            ret = (year_data['value'].iloc[-1] / year_data['value'].iloc[0] - 1) * 100
+            max_val = year_data['value'].max()
+            dd = ((year_data['value'] - year_data['value'].cummax()) / year_data['value'].cummax()).min() * 100
+            
+            stats.append({
+                'Año': year,
+                'Retorno (%)': ret,
+                'Max DD (%)': dd,
+                'Valor Final': year_data['value'].iloc[-1]
+            })
+    
+    stats_df = pd.DataFrame(stats)
+    
+    # Crear figura
+    fig, ax = plt.subplots(figsize=(12, 8))
+    ax.axis('off')
+    
+    # Crear tabla
+    table_data = []
+    table_data.append(['Año', 'Retorno (%)', 'Max DD (%)', 'Valor Final ($)'])
+    
+    for _, row in stats_df.iterrows():
+        table_data.append([
+            int(row['Año']),
+            f"{row['Retorno (%)']:.2f}",
+            f"{row['Max DD (%)']:.2f}",
+            f"${row['Valor Final']:,.0f}"
+        ])
+    
+    # Agregar fila de promedio
+    avg_return = stats_df['Retorno (%)'].mean()
+    avg_dd = stats_df['Max DD (%)'].mean()
+    table_data.append(['PROMEDIO', f"{avg_return:.2f}", f"{avg_dd:.2f}", '-'])
+    
+    table = ax.table(cellText=table_data[1:], colLabels=table_data[0],
+                     cellLoc='center', loc='center',
+                     colWidths=[0.2, 0.3, 0.3, 0.3])
+    table.auto_set_font_size(False)
+    table.set_fontsize(11)
+    table.scale(1, 2)
+    
+    # Estilo
+    for i in range(len(table_data)):
+        if i == 0:  # Header
+            for j in range(4):
+                table[(i, j)].set_facecolor('#2E86AB')
+                table[(i, j)].set_text_props(weight='bold', color='white')
+        elif i == len(table_data) - 1:  # Promedio
+            for j in range(4):
+                table[(i, j)].set_facecolor('#90EE90')
+                table[(i, j)].set_text_props(weight='bold')
+        else:
+            # Color según retorno
+            ret_val = float(table_data[i][1])
+            color = '#90EE90' if ret_val > 0 else '#FFB6C6'
+            for j in range(4):
+                if i % 2 == 0:
+                    table[(i, j)].set_facecolor(color if j == 1 else '#f0f0f0')
+                else:
+                    table[(i, j)].set_facecolor(color if j == 1 else 'white')
+    
+    ax.set_title('Rendimiento Anual - Resumen', fontsize=16, fontweight='bold', pad=20)
+    
+    plt.tight_layout()
+    return fig
 
 if __name__ == "__main__":
     # Test del módulo

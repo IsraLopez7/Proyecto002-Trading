@@ -263,35 +263,62 @@ def run_trading_system(config=None):
         trades_complete
     )
         # ====== REPORTES ======
+        # ====== REPORTES ======
     try:
-        # Dashboard principal
-        fig_dash = report.create_comprehensive_report(
-        df_complete_signals,
-        portfolio_hist_complete,
-        trades_complete,
-        metrics_complete,
-        best_params,
-        save_path=None  # no guardamos
-        )
-        plt.show()  # <- muestra la figura
+                print("\nGenerando reportes visuales...")
+        
+                # Dashboard principal
+                fig_dash = report.create_comprehensive_report(
+                    df_complete_signals,
+                    portfolio_hist_complete,
+                    trades_complete,
+                    metrics_complete,
+                    best_params,
+                    save_path='report_dashboard.png'
+                )
+        
+                # Distribución de retornos
+                fig_dist = report.create_distribution_analysis(
+                    portfolio_hist_complete,
+                    trades_complete
+                )
+                plt.savefig('report_distribution.png', dpi=150, bbox_inches='tight')
+        
+                # Retornos mensuales
+                fig_monthly = report.create_monthly_performance_table(
+                    portfolio_hist_complete,
+                    dates=df_complete_signals['date'].values
+                )
+                plt.savefig('report_monthly.png', dpi=150, bbox_inches='tight')
 
-        # Distribución de retornos
-        fig_dist = report.create_distribution_analysis(
-            portfolio_hist_complete,
-            trades_complete
-        )
-        plt.show()
+                # Retornos trimestrales
+                fig_quarterly = report.create_quarterly_performance_table(
+                    portfolio_hist_complete,
+                    dates=df_complete_signals['date'].values
+                )
+                plt.savefig('report_quarterly.png', dpi=150, bbox_inches='tight')
 
-        # Tabla de retornos mensuales (heatmap o tabla)
-        fig_heat = report.create_monthly_performance_table(
-            portfolio_hist_complete,
-            dates=df_complete_signals['date'].values
-        )
-        plt.show()
+                # Retornos anuales
+                fig_annual = report.create_annual_performance_table(
+                    portfolio_hist_complete,
+                    dates=df_complete_signals['date'].values
+                )
+                plt.savefig('report_annual.png', dpi=150, bbox_inches='tight')
 
-        print("\nListo: se mostraron las 3 gráficas en ventanas interactivas.")
+                # Mostrar todas las figuras
+                plt.show()
+
+                print("\n✓ Reportes generados y guardados:")
+                print("  - report_dashboard.png")
+                print("  - report_distribution.png")
+                print("  - report_monthly.png")
+                print("  - report_quarterly.png (NUEVO)")
+                print("  - report_annual.png (NUEVO)")
+        
     except Exception as e:
-        print(f"\n⚠️  No se pudieron generar/mostrar los reportes gráficos: {e}")
+                print(f"\n⚠️  Error generando reportes: {e}")
+                import traceback
+                traceback.print_exc()
 
 
     print_detailed_metrics(metrics_complete, "MÉTRICAS EN DATASET COMPLETO")
